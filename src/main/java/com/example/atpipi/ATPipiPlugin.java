@@ -24,14 +24,14 @@ public class ATPipiPlugin extends JavaPlugin implements CommandExecutor {
     public void onEnable() {
         // Определяем, является ли версия "устаревшей" (до 1.13)
         isLegacyVersion = !Bukkit.getVersion().contains("1.13")
-            && !Bukkit.getVersion().contains("1.14")
-            && !Bukkit.getVersion().contains("1.15")
-            && !Bukkit.getVersion().contains("1.16")
-            && !Bukkit.getVersion().contains("1.17")
-            && !Bukkit.getVersion().contains("1.18")
-            && !Bukkit.getVersion().contains("1.19")
-            && !Bukkit.getVersion().contains("1.20")
-            && !Bukkit.getVersion().contains("1.21");
+                      && !Bukkit.getVersion().contains("1.14")
+                      && !Bukkit.getVersion().contains("1.15")
+                      && !Bukkit.getVersion().contains("1.16")
+                      && !Bukkit.getVersion().contains("1.17")
+                      && !Bukkit.getVersion().contains("1.18")
+                      && !Bukkit.getVersion().contains("1.19")
+                      && !Bukkit.getVersion().contains("1.20")
+                      && !Bukkit.getVersion().contains("1.21");
 
         // Регистрируем команды
         getCommand("atpipi").setExecutor(this);
@@ -46,7 +46,7 @@ public class ATPipiPlugin extends JavaPlugin implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Команда включения/выключения
+        // Переключение плагина
         if (command.getName().equalsIgnoreCase("atpipi-toggle")) {
             if (!sender.hasPermission("atpipi.toggle")) {
                 sender.sendMessage("§cУ тебя нет прав на эту команду");
@@ -97,20 +97,23 @@ public class ATPipiPlugin extends JavaPlugin implements CommandExecutor {
     }
 
     private void dropYellowConcrete(Player player, Set<Player> hitPlayers, boolean[] hasNotified) {
+        // Выбираем материал бетона в зависимости от версии
         Material concreteMaterial = isLegacyVersion
             ? Material.valueOf("CONCRETE")
             : Material.YELLOW_CONCRETE;
 
-        // Спавним падающий блок вместо предмета
+        // Спавним падающий блок вместо предмета, чтобы избежать крашей
         FallingBlock block = player.getWorld().spawnFallingBlock(
             player.getLocation(),
             concreteMaterial.createBlockData()
         );
-        block.setDropItem(false);
-        Vector dir = player.getLocation().getDirection().normalize().multiply(0.5);
-        block.setVelocity(dir);
+        block.setDropItem(false); // Чтобы при исчезновении не дропался блок
 
-        // Удаляем через секунду
+        // Задаём направление и скорость полёта
+        Vector direction = player.getLocation().getDirection().normalize().multiply(0.5);
+        block.setVelocity(direction);
+
+        // Через 20 тиков (1 секунда) удаляем сущность
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -118,9 +121,9 @@ public class ATPipiPlugin extends JavaPlugin implements CommandExecutor {
             }
         }.runTaskLater(this, 20L);
 
-        // Проверка попадания
-        for (Entity e : player.getNearbyEntities(1, 1, 1)) {
-            if (e instanceof Player target && !hitPlayers.contains(target)) {
+        // Проверяем попадание на игроков в радиусе 1 блока
+        for (Entity entity : player.getNearbyEntities(1, 1, 1)) {
+            if (entity instanceof Player target && !hitPlayers.contains(target)) {
                 hitPlayers.add(target);
                 player.sendMessage("Я попал на " + target.getName());
                 if (!hasNotified[0]) {
