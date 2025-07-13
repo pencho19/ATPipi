@@ -1,13 +1,12 @@
 name: ATPipi
 version: 1.1
 main: com.example.atpipi.ATPipiPlugin
-api-version: 1.13  # Минимальная версия API (можно указать 1.12, но без api-version)
-softdepend:
-  - No  # Если вы хотите, чтобы плагин зависел от сторонних плагинов (например, Vault)
+api-version: 1.13
+
 commands:
   atpipi:
     description: Пускать желтые блоки бетона из ног игрока.
-    usage: /atpipi
+    usage: /atpipi [off]
     permission: atpipi.use
 
 permissions:
